@@ -1,5 +1,6 @@
 import pygame
 import os 
+import random
 
 pygame.init()
 
@@ -16,9 +17,13 @@ RUNNING = [pygame.image.load(os.path.join("Assets\Dino", "DinoRun1.png")),
 DUCK = [pygame.image.load(os.path.join("Assets\Dino", "DinoDuck1.png")),
        pygame.image.load(os.path.join("Assets\Dino", "DinoDuck2.png"))]
 
+CLOUD = pygame.image.load(os.path.join("Assets\Other", "Cloud.png"))
+
+ROAD = pygame.image.load(os.path.join("Assets\Other", "Track.png"))
+
 class player:
     pos_x = 15
-    pos_y = 400
+    pos_y = 330
 
     def __init__(self):
         #image
@@ -88,14 +93,49 @@ class player:
     def draw(self, canvas):
         canvas.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
-
 class score:
     def __init__(self):
         self.score = 0
 
+class cloud:
+    def __init__(self):
+        self.x = screen_H + random.randint(500,800)
+        self.y = random.randint(50,100)
+        self.image = CLOUD
+        self.width = self.image.get_width()
+    
+    def update(self):
+        self.x -= game_speed
+        if self.x < - self.width:
+            self.x = screen_W + random.randint(2500,3000)
+            self.y = random.randint(50,100)
+
+    def draw(self, canvas):
+        canvas.blit(self.image, (self.x,self.y))
+
+class bg:
+    bg_x = 0
+    bg_y = 400
+    def __init__(self):
+        self.image_width = ROAD.get_width()
+
+    def update(self):
+        canvas.blit(ROAD, (bg.bg_x,bg.bg_y))
+        canvas.blit(ROAD, (self.image_width + bg.bg_x, bg.bg_y))
+        if bg.bg_x <= -self.image_width:
+            canvas.blit(ROAD, (self.image_width + bg.bg_x,bg.bg_y))
+            bg.bg_x = 0
+        bg.bg_x -= game_speed
+    
 def start() : 
     run = True 
+
     trex = player()
+    Cloud = cloud()
+    Background = bg()
+
+    global game_speed 
+    game_speed = 10
 
     while run :
         clock = pygame.time.Clock()
@@ -109,6 +149,12 @@ def start() :
         canvas.fill((255,255,255))
         trex.draw(canvas)
         trex.update(keys)
+
+        Background.update()
+
+        Cloud.draw(canvas)
+        Cloud.update()
+
         clock.tick(30)
         pygame.display.update()
 
