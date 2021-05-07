@@ -31,6 +31,9 @@ OBSTACLE_LARGE = [pygame.image.load(os.path.join("Assets\Cactus", "LargeCactus1.
 ROAD = pygame.image.load(os.path.join("Assets\Other", "Track.png"))
 
 START = pygame.image.load(os.path.join("Assets\Other","Start.png"))
+EXIT = pygame.image.load(os.path.join("Assets\Other","exit.png"))
+RESET = pygame.image.load(os.path.join("Assets\Other","Reset.png"))
+GAME_OVER = pygame.image.load(os.path.join("Assets\Other","GameOver.png"))
 
 class player:
     pos_x = 15
@@ -89,8 +92,8 @@ class player:
         
     def jump_act(self):
         if self.jump: 
-            self.dino_rect.y -= self.jump_vel * 4
-            self.jump_vel -= 0.8
+            self.dino_rect.y -= self.jump_vel * 5
+            self.jump_vel -= 0.6
         if self.jump_vel < - self.do_jump:
             self.jump = False
             self.jump_vel = self.do_jump
@@ -104,7 +107,7 @@ class player:
         self.step_index +=  int(game_speed/10)
 
     def draw(self, canvas):
-        canvas.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
+        canvas.blit(self.image, self.dino_rect)
 
 class score:
     def __init__(self):
@@ -159,9 +162,9 @@ class bg:
         bg.bg_x -= game_speed
 
 class obstacle:
-    def __init__(self,image,type):
+    def __init__(self,image,tipe):
         self.image = image
-        self.type = type
+        self.type = tipe
         self.rect = self.image[self.type].get_rect()
         self.rect.x = screen_W * 2
 
@@ -222,8 +225,7 @@ def start() :
             i.draw(canvas)
             i.update()
             if trex.dino_rect.colliderect(i.rect):
-                pygame.draw.rect(canvas, (255,0,0), trex.dino_rect,2)
-                #fungsi game berakhir
+                restart(skor.points)
         
         Background.update()
         Cloud.draw(canvas)
@@ -235,22 +237,72 @@ def start() :
 
     pygame.quit()
 
+def restart(skor):
+    run = True
+    while run :
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if restart_rect.collidepoint(event.pos):
+                    start()
+                elif exit_rect.collidepoint(event.pos):
+                    run = False
+
+        canvas.fill((255,255,255))
+
+        font = pygame.font.Font('freesansbold.ttf',20)
+        if (skor < 5):
+            text = font.render("Kamu Cupu poin kamu cuma : " + str(skor),True,(0,0,0))
+        else :
+            text = font.render("Kamu hebat banget poin kamu : " + str(skor),True,(0,0,0))
+        textRect = text.get_rect() 
+        textRect.center = (350 , 150)
+        canvas.blit(text,textRect) 
+
+        restart_rect = RESET.get_rect()
+        restart_rect.x = 300
+        restart_rect.y = 270
+
+        exit_rect = EXIT.get_rect()
+        exit_rect.x = 270
+        exit_rect.y = 400
+        canvas.blit(EXIT,exit_rect)
+
+        canvas.blit(GAME_OVER,(170,200))
+        canvas.blit(RESET,restart_rect)
+        pygame.display.update()
+
+    pygame.quit() 
+
 def main_menu():
     run = True 
     while run :
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_rect.collidepoint(event.pos):
+                    start()
+                elif exit_rect.collidepoint(event.pos):
+                    run = False
 
-        mouse = pygame.mouse.get_pos()
-        click = pygame.mouse.get_pressed()
         canvas.fill((255,255,255))
-        canvas.blit(START, (250, 160))
+
         start_rect = START.get_rect()
-        print()
+        start_rect.x = 265
+        start_rect.y = 150
+
+        exit_rect = EXIT.get_rect()
+        exit_rect.x = 265
+        exit_rect.y = 250
+
+        canvas.blit(START,start_rect)
+        canvas.blit(EXIT,exit_rect)
         pygame.display.update()
 
     pygame.quit()
 
 if __name__ == "__main__" :
     main_menu()
+d
