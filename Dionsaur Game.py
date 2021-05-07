@@ -30,6 +30,8 @@ OBSTACLE_LARGE = [pygame.image.load(os.path.join("Assets\Cactus", "LargeCactus1.
 
 ROAD = pygame.image.load(os.path.join("Assets\Other", "Track.png"))
 
+START = pygame.image.load(os.path.join("Assets\Other","Start.png"))
+
 class player:
     pos_x = 15
     pos_y = 330
@@ -185,12 +187,12 @@ class Largeobstacle(obstacle):
 
 def start() : 
     run = True 
-
+    
     trex = player()
     Cloud = cloud()
     Background = bg()
     skor = score()
-
+    
     global game_speed,rintangan
     game_speed = 10
     rintangan = []
@@ -233,5 +235,22 @@ def start() :
 
     pygame.quit()
 
+def main_menu():
+    run = True 
+    while run :
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+
+        mouse = pygame.mouse.get_pos()
+        click = pygame.mouse.get_pressed()
+        canvas.fill((255,255,255))
+        canvas.blit(START, (250, 160))
+        start_rect = START.get_rect()
+        print()
+        pygame.display.update()
+
+    pygame.quit()
+
 if __name__ == "__main__" :
-    start()
+    main_menu()
