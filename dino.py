@@ -14,7 +14,7 @@ canvas = pygame.display.set_mode((screen_H, screen_W))
 
 RUNNING = [pygame.image.load(os.path.join("Assets\Dino", "1.png")),
            pygame.image.load(os.path.join("Assets\Dino", "2.png")),
-           pygame.image.load(os.path.join("Assets\Dino", "3.png"))]
+           pygame.image.load(os.path.join("Assets\Dino", "3.png")),]
 
 DUCK = [pygame.image.load(os.path.join("Assets\Dino", "DinoDuck1.png")),
         pygame.image.load(os.path.join("Assets\Dino", "DinoDuck2.png"))]
@@ -61,8 +61,8 @@ class player:
         self.image = self.run_img[0]
         self.dino_rect = self.image.get_rect()
         self.do_duck = 30
-        self.do_jump = 8.5
-        self.jump_vel = 8.5
+        self.do_jump = 7
+        self.jump_vel = 7
 
         self.dino_rect.x = player.pos_x
         self.dino_rect.y = player.pos_y
@@ -124,7 +124,7 @@ class score:
         self.count = 0
         self.font = pygame.font.Font('freesansbold.ttf', 20)
 
-    def nambah(self):
+    def update(self):
         if(self.count % 5 == 0 and self.count > 1):
             self.points += 11
         else:
@@ -134,8 +134,8 @@ class score:
             game_speed += 1
         self.count += 1
 
-    def tampilkan(self,malam=False):
-        if (malam):
+    def draw(self,night=False):
+        if (night):
             text = self.font.render("Points : " + str(self.points), True, white)
         else : 
             text = self.font.render("Points : " + str(self.points), True, black)
@@ -184,7 +184,7 @@ class obstacle:
     def update(self):
         self.rect.x -= game_speed
         if self.rect.x < -self.rect.width:
-            rintangan.pop()
+            rintangan.pop() 
 
     def draw(self, canvas):
         canvas.blit(self.image[self.type], self.rect)
@@ -195,13 +195,13 @@ class smallobstacle(obstacle):
         super().__init__(image, self.type)
         self.rect.y = 350
 
-class Largeobstacle(obstacle):
+class largeobstacle(obstacle):
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 325
 
-class Bird(obstacle):
+class bird(obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
@@ -214,161 +214,180 @@ class Bird(obstacle):
         canvas.blit(self.image[self.index//5], self.rect)
         self.index += 1
 
-def start():
-    run = True
+class menu:
+    def __init__(self):
+        self.start_rect = START.get_rect()
+        self.start_rect.x = 265
+        self.start_rect.y = 150
 
-    trex = player()
-    Cloud = cloud()
-    Background = bg()
-    skor = score()
+        self.exit_rect = EXIT.get_rect()
+        self.exit_rect.x = 265
+        self.exit_rect.y = 250
 
-    global game_speed, rintangan
-    game_speed = 10
-    rintangan = []
-
-    while run:
-        clock = pygame.time.Clock()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    pause()
-
-        keys = pygame.key.get_pressed()
-
-        if (skor.points // 10 % 2 == 1):
-            canvas.fill(black)
-            skor.tampilkan(True)
-        else : 
-            canvas.fill(white)
-            skor.tampilkan()
-        trex.draw(canvas)
-        trex.update(keys)
-
-        if len(rintangan) == 0:
-            if random.randint(0, 1) == 1:
-                rintangan.append(smallobstacle(OBSTACLE_SMALL))
-                skor.nambah()
-            elif random.randint(0, 1) == 1:
-                rintangan.append(Largeobstacle(OBSTACLE_LARGE))
-                skor.nambah()
-            elif random.randint(0, 1) == 1:
-                rintangan.append(Bird(OBSTACLE_BIRD))
-                skor.nambah()
-
-        for i in rintangan:
-            i.draw(canvas)
-            i.update()
-            if trex.dino_rect.colliderect(i.rect):
-                restart(skor.points)
-
-        Background.update()
-        Cloud.draw(canvas)
-        Cloud.update()
-
-        clock.tick(30)
-        pygame.display.update()
-
-    pygame.quit()
-
-def pause():
-    paused = True
-    while paused:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = True
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_c:
-                    paused = False
-
-                elif event.key == pygame.K_q:
-                    pygame.quit()
-                    quit()
-                
-                elif event.key == pygame.K_r:
-                    paused = False
-                    start()
-
-        canvas.fill((255, 255, 255))
-        font = pygame.font.Font('freesansbold.ttf', 20)
-        text = font.render(
-            "Press C to continue or Q to quit or R to new game", True, (0, 0, 0))
-        textRect = text.get_rect()
-        textRect.center = (350, 150)
-        canvas.blit(text, textRect)
-        pygame.display.update()
-        clock = pygame.time.Clock()
-        clock.tick(5)
-
-def restart(skor):
-    run = True
-    while run:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if restart_rect.collidepoint(event.pos):
-                    start()
-                elif exit_rect.collidepoint(event.pos):
+    def run(self):
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.start_rect.collidepoint(event.pos):
+                        run = False
+                        return True
+                    elif self.exit_rect.collidepoint(event.pos):
+                        run = False
+                        return False
+                        
 
-        canvas.fill((255, 255, 255))
+            canvas.fill((255, 255, 255))
+            canvas.blit(START, self.start_rect)
+            canvas.blit(EXIT, self.exit_rect)
+        
+            pygame.display.update()
 
+class start:
+    def __init__(self):
+        self.trex = player()
+        self.Cloud = cloud()
+        self.Background = bg()
+        self.skor = score()
+        self.menu = menu()
+        global game_speed, rintangan
+        game_speed = 10
+        rintangan = []
+    
+    def run(self):
+        self.run = True
+        while self.run:
+            clock = pygame.time.Clock()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.run = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_p:
+                        stop = pause()
+                        stop.run()
+
+            keys = pygame.key.get_pressed()
+
+            if (self.skor.points // 10 % 2 == 1):
+                canvas.fill(black)
+                self.skor.draw(True)
+            else : 
+                canvas.fill(white)
+                self.skor.draw()
+            self.trex.draw(canvas)
+            self.trex.update(keys)
+
+            if len(rintangan) == 0:
+                if random.randint(0, 1) == 1:
+                    rintangan.append(smallobstacle(OBSTACLE_SMALL))
+                    self.skor.update()
+                elif random.randint(0, 1) == 1:
+                    rintangan.append(largeobstacle(OBSTACLE_LARGE))
+                    self.skor.update()
+                elif random.randint(0, 1) == 1:
+                    rintangan.append(bird(OBSTACLE_BIRD))
+                    self.skor.update()
+                    
+            for i in rintangan:
+                i.draw(canvas)
+                i.update()
+                if self.trex.dino_rect.colliderect(i.rect):
+                    restart = game_over(self.skor.points)
+                    self.run = restart.run()
+
+            self.Background.update()
+            self.Cloud.draw(canvas)
+            self.Cloud.update()
+
+            clock.tick(30)
+            pygame.display.update()
+
+        pygame.quit()
+
+class pause:
+    def __init__(self) :
+        self.font = pygame.font.Font('freesansbold.ttf', 20)
+        self.text = self.font.render(
+            "Press C to continue or Q to quit or R to new game", True, (0, 0, 0))
+        self.textRect = self.text.get_rect()
+        self.textRect.center = (350, 150)
+        self.paused = True
+    
+    def run(self):
+        while self.paused:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.paused = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_c:
+                        self.paused = False
+
+                    elif event.key == pygame.K_q:
+                        pygame.quit()
+                    
+                    elif event.key == pygame.K_r:
+                        self.paused = False
+                        gameplay = start()
+                        gameplay.run()
+                        
+
+            canvas.fill((255, 255, 255))
+            
+            canvas.blit(self.text, self.textRect)
+            pygame.display.update()
+        
+class game_over:
+    def __init__(self,skor) :
         font = pygame.font.Font('freesansbold.ttf', 20)
         if (skor < 10):
-            text = font.render("Kamu Cupu poin kamu cuma : " + str(skor), True, (0, 0, 0))
+            self.text = font.render("Kamu Cupu poin kamu cuma : " + str(skor), True, (0, 0, 0))
         else:
-            text = font.render("Kamu hebat banget poin kamu : " + str(skor), True, (0, 0, 0))
-        
-        textRect = text.get_rect()
-        textRect.center = (350, 150)
-        canvas.blit(text, textRect)
+            self.text = font.render("Kamu hebat banget poin kamu : " + str(skor), True, (0, 0, 0))
+        self.textRect = self.text.get_rect()
+        self.textRect.center = (350, 150)
+    
+        self.restart_rect = RESET.get_rect()
+        self.restart_rect.x = 270
+        self.restart_rect.y = 270
 
-        restart_rect = RESET.get_rect()
-        restart_rect.x = 270
-        restart_rect.y = 270
+        self.exit_rect = EXIT_btn_restart.get_rect()
+        self.exit_rect.x = 370
+        self.exit_rect.y = 275
+        self.run()
 
-        exit_rect = EXIT_btn_restart.get_rect()
-        exit_rect.x = 370
-        exit_rect.y = 275
-        canvas.blit(EXIT_btn_restart, exit_rect)
-
-        canvas.blit(GAME_OVER, (170, 200))
-        canvas.blit(RESET, restart_rect)
-        pygame.display.update()
-
-    pygame.quit()
-
-def main_menu():
-    run = True
-    while run:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if start_rect.collidepoint(event.pos):
-                    start()
-                elif exit_rect.collidepoint(event.pos):
+    def run(self):
+        run = True
+        while run:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if self.restart_rect.collidepoint(event.pos):
+                        gameplay = start()
+                        gameplay.run()
+                        run = False
+                    elif self.exit_rect.collidepoint(event.pos):
+                        run = False
+                        pygame.quit()
 
-        canvas.fill((255, 255, 255))
+            canvas.fill(white)
+            canvas.blit(EXIT_btn_restart, self.exit_rect)
+            canvas.blit(self.text, self.textRect)
+            canvas.blit(GAME_OVER, (170, 200))
+            canvas.blit(RESET, self.restart_rect)
+            pygame.display.update()
 
-        start_rect = START.get_rect()
-        start_rect.x = 265
-        start_rect.y = 150
-
-        exit_rect = EXIT.get_rect()
-        exit_rect.x = 265
-        exit_rect.y = 250
-
-        canvas.blit(START, start_rect)
-        canvas.blit(EXIT, exit_rect)
-        pygame.display.update()
-
-    pygame.quit()
+        pygame.quit()
 
 if __name__ == "__main__":
-    main_menu()
+    Menu = menu()
+    gameplay = start()
+    play = Menu.run()
+    if play : 
+        gameplay.run()
+    else :
+        pass
