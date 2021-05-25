@@ -14,7 +14,7 @@ canvas = pygame.display.set_mode((screen_H, screen_W))
 
 RUNNING = [pygame.image.load(os.path.join("Assets\Dino", "1.png")),
            pygame.image.load(os.path.join("Assets\Dino", "2.png")),
-           pygame.image.load(os.path.join("Assets\Dino", "3.png"))]
+           pygame.image.load(os.path.join("Assets\Dino", "3.png")),]
 
 DUCK = [pygame.image.load(os.path.join("Assets\Dino", "DinoDuck1.png")),
         pygame.image.load(os.path.join("Assets\Dino", "DinoDuck2.png"))]
@@ -61,8 +61,8 @@ class player:
         self.image = self.run_img[0]
         self.dino_rect = self.image.get_rect()
         self.do_duck = 30
-        self.do_jump = 8.5
-        self.jump_vel = 8.5
+        self.do_jump = 7
+        self.jump_vel = 7
 
         self.dino_rect.x = player.pos_x
         self.dino_rect.y = player.pos_y
@@ -124,7 +124,7 @@ class score:
         self.count = 0
         self.font = pygame.font.Font('freesansbold.ttf', 20)
 
-    def nambah(self):
+    def update(self):
         if(self.count % 5 == 0 and self.count > 1):
             self.points += 11
         else:
@@ -134,8 +134,8 @@ class score:
             game_speed += 1
         self.count += 1
 
-    def tampilkan(self,malam=False):
-        if (malam):
+    def draw(self,night=False):
+        if (night):
             text = self.font.render("Points : " + str(self.points), True, white)
         else : 
             text = self.font.render("Points : " + str(self.points), True, black)
@@ -184,7 +184,7 @@ class obstacle:
     def update(self):
         self.rect.x -= game_speed
         if self.rect.x < -self.rect.width:
-            rintangan.pop()
+            rintangan.pop() 
 
     def draw(self, canvas):
         canvas.blit(self.image[self.type], self.rect)
@@ -195,13 +195,13 @@ class smallobstacle(obstacle):
         super().__init__(image, self.type)
         self.rect.y = 350
 
-class Largeobstacle(obstacle):
+class largeobstacle(obstacle):
     def __init__(self, image):
         self.type = random.randint(0, 2)
         super().__init__(image, self.type)
         self.rect.y = 325
 
-class Bird(obstacle):
+class bird(obstacle):
     def __init__(self, image):
         self.type = 0
         super().__init__(image, self.type)
@@ -214,7 +214,7 @@ class Bird(obstacle):
         canvas.blit(self.image[self.index//5], self.rect)
         self.index += 1
 
-class Menu:
+class menu:
     def __init__(self):
         self.start_rect = START.get_rect()
         self.start_rect.x = 265
@@ -251,7 +251,7 @@ class start:
         self.Cloud = cloud()
         self.Background = bg()
         self.skor = score()
-        self.menu = Menu()
+        self.menu = menu()
         global game_speed, rintangan
         game_speed = 10
         rintangan = []
@@ -273,29 +273,29 @@ class start:
 
             if (self.skor.points // 10 % 2 == 1):
                 canvas.fill(black)
-                self.skor.tampilkan(True)
+                self.skor.draw(True)
             else : 
                 canvas.fill(white)
-                self.skor.tampilkan()
+                self.skor.draw()
             self.trex.draw(canvas)
             self.trex.update(keys)
 
             if len(rintangan) == 0:
                 if random.randint(0, 1) == 1:
                     rintangan.append(smallobstacle(OBSTACLE_SMALL))
-                    self.skor.nambah()
+                    self.skor.update()
                 elif random.randint(0, 1) == 1:
-                    rintangan.append(Largeobstacle(OBSTACLE_LARGE))
-                    self.skor.nambah()
+                    rintangan.append(largeobstacle(OBSTACLE_LARGE))
+                    self.skor.update()
                 elif random.randint(0, 1) == 1:
-                    rintangan.append(Bird(OBSTACLE_BIRD))
-                    self.skor.nambah()
-
+                    rintangan.append(bird(OBSTACLE_BIRD))
+                    self.skor.update()
+                    
             for i in rintangan:
                 i.draw(canvas)
                 i.update()
                 if self.trex.dino_rect.colliderect(i.rect):
-                    restart = Game_over(self.skor.points)
+                    restart = game_over(self.skor.points)
                     self.run = restart.run()
 
             self.Background.update()
@@ -340,7 +340,7 @@ class pause:
             canvas.blit(self.text, self.textRect)
             pygame.display.update()
         
-class Game_over:
+class game_over:
     def __init__(self,skor) :
         font = pygame.font.Font('freesansbold.ttf', 20)
         if (skor < 10):
@@ -384,9 +384,9 @@ class Game_over:
         pygame.quit()
 
 if __name__ == "__main__":
-    menu = Menu()
+    Menu = menu()
     gameplay = start()
-    play = menu.run()
+    play = Menu.run()
     if play : 
         gameplay.run()
     else :
